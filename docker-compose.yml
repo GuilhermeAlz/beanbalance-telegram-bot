@@ -1,0 +1,11 @@
+services:
+  telegram-bot:
+    build: .
+    container_name: beanbalance-telegram-bot
+    env_file: .env
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
