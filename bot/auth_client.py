@@ -69,6 +69,13 @@ class AuthClient:
         tokens = await self._valid_tokens()
         return {"Authorization": f"Bearer {tokens.access_token}"}
 
+    def invalidate(self) -> None:
+        """Drops the cached tokens so the next call re-logs in.
+
+        Used when the API rejects a not-yet-expired token with HTTP 401.
+        """
+        self._tokens = None
+
     async def _valid_tokens(self) -> TokenSet:
         if self._tokens is None:
             self._tokens = await self._provider.login()

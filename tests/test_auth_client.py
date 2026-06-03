@@ -94,6 +94,20 @@ async def test_refreshes_when_token_is_near_expiry() -> None:
     assert provider.refresh_calls == 1
 
 
+async def test_invalidate_forces_fresh_login_on_next_call() -> None:
+    provider = FakeTokenProvider(
+        [_token("a1", expires_in_min=60), _token("a2", expires_in_min=60)]
+    )
+    client = AuthClient(provider, now=MovableClock(_NOW))
+
+    await client.authorization_header()
+    client.invalidate()  # e.g. after the API rejected the token with 401
+    header = await client.authorization_header()
+
+    assert header == {"Authorization": "Bearer a2"}
+    assert provider.login_calls == 2
+
+
 async def test_relogs_in_when_refresh_fails() -> None:
     provider = FakeTokenProvider(
         [_token("a1", expires_in_min=60), _token("a3", expires_in_min=60)]
